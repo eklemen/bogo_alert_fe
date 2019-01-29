@@ -13,9 +13,11 @@ class ContextProvider extends React.Component {
       user: {error: null, data: {}, fetching: false},
       storesList: {error: null, data: {}, fetching: false},
     }
+    this.baseState = this.state;
   }
 
   query = ({name, url, reqObj = null, method = 'post'}) => {
+
     this.setState({
       [name]: {
         ...this.state[name],
@@ -47,6 +49,10 @@ class ContextProvider extends React.Component {
       });
   };
 
+  _clear = () => {
+    this.setState(this.baseState)
+  };
+
   _getUser = () => (
     this.query({name: 'user', url: '/api/user', method: 'get'})
   );
@@ -63,7 +69,7 @@ class ContextProvider extends React.Component {
     return this.query({name: 'storesList', reqObj: {zipCode}, url:'api/stores'})
   };
 
-  _updateZip = (store) => {
+  _updateStore = (store) => {
     const reqObj = {
       storeNum: store.WASTORENUM,
       name: store.NAME,
@@ -74,9 +80,13 @@ class ContextProvider extends React.Component {
       long: store.CLON,
     };
     return (
-      this.query({name: 'user', reqObj, url: '/api/user', method: 'put'})
+      this.query({name: 'user', reqObj, url: '/api/user/store'})
     );
   };
+
+  _updateUserTerms = (terms) => (
+    this.query({name: 'user', reqObj: {terms}, url: '/api/terms'})
+  );
 
   render() {
     return (
@@ -86,7 +96,9 @@ class ContextProvider extends React.Component {
         _login: this._login,
         _getUser: this._getUser,
         _getStoresByZip: this._getStoresByZip,
-        _updateZip: this._updateZip
+        _updateStore: this._updateStore,
+        _updateUserTerms: this._updateUserTerms,
+        _clear: this._clear,
       }}>
         {this.props.children}
       </ServiceContext.Provider>

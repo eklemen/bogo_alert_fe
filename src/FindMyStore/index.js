@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 import {withCookies} from 'react-cookie';
 import {Grid, Button, Form, Table, Container, Header} from 'semantic-ui-react';
 import {withService} from '../Context/withService';
-import axios from "axios/index";
-import AsyncSection from "../shared/AsyncSection";
+import AsyncSection from '../shared/AsyncSection';
+import {checkUser} from '../shared/utils';
 
 class FindMyStore extends Component {
   constructor(props) {
@@ -15,22 +15,7 @@ class FindMyStore extends Component {
   }
 
   async componentDidMount() {
-    const {user, _getUser, history, cookies} = this.props;
-    const token = cookies.get('bogoUserToken');
-
-    if (!user.data.token) {
-      if (token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        try {
-          await _getUser();
-        } catch (err) {
-          axios.defaults.headers.common['Authorization'] = '';
-          history.push('/login');
-        }
-      } else {
-        history.push('/login');
-      }
-    }
+    await checkUser.call(this);
   }
 
   handleChange = (_, {value: zipCode}) => {
@@ -42,31 +27,32 @@ class FindMyStore extends Component {
   };
 
   handleSelectStore = store => async () => {
-    const update = await this.props._updateZip(store);
+    const update = await this.props._updateStore(store);
     if (update && update.store) {
-      this.props.history.push('/about/');
+      this.props.history.push('/dashboard/');
     }
   };
 
   render() {
-    const {storesList} = this.props;
+    const {storesList, iconsOnly, cancel} = this.props;
     const {selectedStore} = this.state;
     return (
       <Grid style={{height: '100%', justifyContent: 'center'}} verticalAlign='top'>
-        <Grid.Row style={{maxWidth: 450, marginTop: '5em'}}>
+        <Grid.Row style={{maxWidth: 450, marginTop: '2em'}}>
           <Form onSubmit={this.handleSubmit}>
             <Form.Input
               label='5-Digit Zip Code'
               onChange={this.handleChange}
               focus
             />
+            <Button content='Cancel' type='button' onClick={cancel} />
             <Button type='submit'>
               Search
             </Button>
           </Form>
         </Grid.Row>
         <Grid.Row>
-          <Container style={{minHeight: '300px'}}>
+          <Container className='store-list'>
             <AsyncSection dataSet={storesList}>
               <Table basic='very' padded>
                 <Table.Body>
@@ -91,14 +77,19 @@ class FindMyStore extends Component {
                           </Header.Content>
                         </Header>
                       </Table.Cell>
-                      <Table.Cell>
-                        <Button icon='map marker alternate' content='Map'/>
+                      <Table.Cell style={{padding: '0'}}>
+                        <Button
+                          icon='map marker alternate'
+                          content={iconsOnly ? '' : 'Map'}
+                          size='tiny'
+                        />
                       </Table.Cell>
-                      <Table.Cell>
+                      <Table.Cell style={{padding: '0'}}>
                         <Button
                           icon='add'
-                          content='Add'
-                          onClick={this.handleSelectStore(store.WASTORENUM)}
+                          content={iconsOnly ? '' : 'Add'}
+                          size='tiny'
+                          onClick={this.handleSelectStore(store)}
                         />
                       </Table.Cell>
                     </Table.Row>

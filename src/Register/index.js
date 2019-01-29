@@ -51,7 +51,7 @@ class Register extends React.Component {
       cookies.set('bogoUserToken',
         user.token,
         {path: '/'});
-      history.push('/findMyStore');
+      history.push('/dashboard/');
     }
   };
 

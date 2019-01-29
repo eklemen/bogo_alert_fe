@@ -1,39 +1,31 @@
 import React from "react";
-import {BrowserRouter as Router, Route, Link} from "react-router-dom";
+import {BrowserRouter as Router, Route} from "react-router-dom";
+import {Container} from 'semantic-ui-react';
 import Login from "./Login";
+import Logout from "./Logout";
 import Register from "./Register";
 import FindMyStore from './FindMyStore';
 import Dashboard from "./Dashboard";
+import PrivateRoute from './shared/PrivateRoute';
+import Navbar from './shared/Navbar';
 
-const About = () => <h2>About</h2>;
-const Users = () => <h2>Users</h2>;
-
-const Routes = () => (
+const Routes = () => {
+  return (
   <Router>
     <React.Fragment>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Login</Link>
-          </li>
-          <li>
-            <Link to="/about/">About</Link>
-          </li>
-          <li>
-            <Link to="/users/">Users</Link>
-          </li>
-        </ul>
-      </nav>
+      <Navbar />
 
-      <Route path="/" exact    component={Login}/>
-      <Route path="/login/"    component={Login}/>
-      <Route path="/register/" component={Register}/>
-      <Route path="/findMyStore/" component={FindMyStore}/>
-      <Route path="/dashboard/" component={Dashboard}/>
-      <Route path="/about/"    component={About}/>
-      <Route path="/users/"    component={Users}/>
+      <Container className='page-container'>
+        <Route path="/" exact    component={Login}/>
+        <Route path="/login/"    component={Login}/>
+        <Route path="/logout/"    component={Logout}/>
+        <Route path="/register/" component={Register}/>
+
+        <PrivateRoute path="/findMyStore/" component={FindMyStore}/>
+        <PrivateRoute path="/dashboard/" component={Dashboard}/>
+      </Container>
     </React.Fragment>
-  </Router>
-);
+  </Router>)
+};
 
 export default Routes;

@@ -36,11 +36,11 @@ class Login extends React.Component {
 
   submitLogin = async () => {
     const {form: {email, password}} = this.state;
-    const {_login, user, history, cookies} = this.props;
+    const {_login, history, cookies} = this.props;
     try {
       const auth = await _login({email, password});
       axios.defaults.headers.common['Authorization'] = `Bearer ${auth.token}`;
-      cookies.set('bogoUserToken', user.token, {path: '/'});
+      cookies.set('bogoUserToken', auth.token, {path: '/'});
       history.push('/dashboard/');
     } catch (err) {
       console.log("Unauthorized...", err)
