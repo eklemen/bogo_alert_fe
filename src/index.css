@@ -55,29 +55,17 @@ code {
 }
 .logo-link:hover {
   opacity: 0.8;
+  text-decoration: underline;
 }
 
-.term-list {
-  margin: 1em -14px;
-  padding: 0;
+.terms-list {
+  padding: 1em 0 0.7em 0.7em !important;
 }
 .term-li {
   display: flex !important;
   justify-content: space-between;
   align-items: center;
   padding: .2em 1.5em;
-}
-.term-li:hover {
-  background-color: rgba(128, 128, 128, 0.15);
-}
-
-.term-li > .term-btns {
-  margin-left: auto;
-  visibility: hidden;
-}
-
-.term-li:hover > .term-btns {
-  visibility: unset;
 }
 
 .btn-link {

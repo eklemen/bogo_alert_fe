@@ -34,7 +34,7 @@ class MyStore extends React.Component {
             <Placeholder.Line/>
           </Placeholder.Paragraph>
         </Placeholder>}
-        <div style={{minHeight: '50px'}}>
+        <div style={{minHeight: '80px'}}>
           {
             !loading && data.store && !isEditing &&
             <div className='store-address'>

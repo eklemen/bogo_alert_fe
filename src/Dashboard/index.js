@@ -1,67 +1,40 @@
 import React, {Component} from 'react';
-import {Grid, Header, Segment, Label, Input, Button, Placeholder} from 'semantic-ui-react';
+import {Grid, Header, Segment, Label, List, Button, Placeholder, Container} from 'semantic-ui-react';
 import {withCookies} from 'react-cookie';
 import {withService} from '../Context/withService';
 import {checkUser} from '../shared/utils';
 import MyStore from "./components/MyStore";
+import CreatableSelect from 'react-select/lib/Creatable';
+import {groceries} from '../shared/constants';
 
 class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      editTerms: false,
       terms: props.user.data.terms || [],
       editingTerm: '',
       editTermValue: '',
       touched: false,
     };
+    this.groceries = groceries;
   }
 
   async componentDidMount() {
-    if(checkUser.call(this)) {
+    if (checkUser.call(this)) {
       const {terms} = await this.props._getUser();
       terms && this.setState({terms});
-    };
+    }
+    ;
   }
 
-  // Selects the term to edit
-  editTerm = (term) => {
-    this.setState({
-      editingTerm: term,
-      editTermValue: term,
-      touched: true
-    });
+  toggleEditTerms = () => {
+    this.setState({editTerms: !this.state.editTerms})
   };
 
-  // enter will save term
-  handleEnter = e => {
-    if (e.key === 'Enter') {
-      this.saveEditTerm();
-    }
-  };
-
-  // updates value of input of term being edited
-  handleTermEdit = (_, data) => {
-    this.setState({editTermValue: data.value})
-  };
-
-  closeEditTerm = () => {
-    const filtered = this.state.terms.filter(t => t !== '');
-    this.setState({
-      terms: filtered,
-      editingTerm: '', editingTermValue: ''
-    });
-  };
-
-  saveEditTerm = () => {
-    const terms = [...this.state.terms];
-    const i = terms.indexOf(this.state.editingTerm);
-    terms[i] = this.state.editTermValue;
-    this.setState({terms, touched: true}, () => this.closeEditTerm());
-  };
-
-  removeEditTerm = (term) => {
-    const filtered = this.state.terms.filter(t => term !== t);
-    this.setState({terms: filtered, touched: true})
+  handleChange = (e) => {
+    const updated = e.map(t => t.label);
+    this.setState({terms: updated});
   };
 
   // cancel all changes
@@ -72,23 +45,19 @@ class Dashboard extends Component {
   // submit term to api
   submitChanges = () => {
     this.props._updateUserTerms(this.state.terms);
-  };
-
-  // add new term
-  addTerm = () => {
-    if (!this.state.terms.includes('')) {
-      this.setState({
-        terms: [...this.state.terms, ''],
-        editingTerm: '',
-        editTermValue: ''
-      })
-    }
+    this.toggleEditTerms();
   };
 
   render() {
     const {user: {data}, user} = this.props;
     const {terms} = this.state;
     const loading = (user.fetching || !Object.keys(user.data).length) && !user.error;
+    const options = terms.map(label => {
+      return {
+        label,
+        value: label.toLowerCase(),
+      }
+    });
     return (
       <Grid style={{height: '100%', justifyContent: 'center'}} verticalAlign='top'>
         <Grid.Row>
@@ -96,7 +65,7 @@ class Dashboard extends Component {
         </Grid.Row>
         <Grid.Row columns={2}>
           <Grid.Column mobile={16} computer={8}>
-            <MyStore loading={loading} data={data} />
+            <MyStore loading={loading} data={data}/>
 
           </Grid.Column>
           <Grid.Column mobile={16} computer={8}>
@@ -115,62 +84,49 @@ class Dashboard extends Component {
                   <Placeholder.Line/>
                 </Placeholder.Paragraph>
               </Placeholder>}
-              <div style={{minHeight: '50px'}}>
+              <Container style={{minHeight: '80px'}}>
                 {
                   !loading &&
-                  <ul className='term-list'>
-                    {
-                      terms.map(term => {
-                        return (
-                          term === this.state.editingTerm
-                            ? (
-                              <div className='term-li' key={term}>
-                                <Input
-                                  focus
-                                  value={this.state.editTermValue}
-                                  onChange={this.handleTermEdit}
-                                  onKeyPress={this.handleEnter}
-                                  onBlur={this.closeEditTerm}
-                                />
-                                <div className='term-btns links' style={{visibility: 'unset'}}>
-                                  <Button
-                                    size='mini'
-                                    onClick={this.closeEditTerm}>Cancel</Button>
-                                  <Button
-                                    size='mini'
-                                    color='blue'
-                                    onClick={this.saveEditTerm}>Save</Button>
-                                </div>
-                              </div>
-                            )
-                            : (
-                              <li className='term-li' key={term}>
-                                <span>{term}</span>
-                                <div className='term-btns'>
-                                  <Button
-                                    circular
-                                    size='mini'
-                                    icon='close'
-                                    onClick={() => this.removeEditTerm(term)}/>
-                                  <Button
-                                    circular
-                                    size='mini'
-                                    icon='edit outline'
-                                    onClick={() => this.editTerm(term)}
-                                  />
-                                </div>
-                              </li>
-                            )
-                        );
-                      })
-                    }
-                  </ul>
+                  (this.state.editTerms
+                      ?
+                      <>
+                        <CreatableSelect
+                          isMulti
+                          defaultValue={options}
+                          onChange={this.handleChange}
+                          options={this.groceries}
+                        />
+                        <Grid.Row style={{textAlign: 'right', paddingTop: '0.6em'}}>
+                          <Button
+                            className='link padded'
+                            onClick={this.toggleEditTerms}
+                          >Cancel</Button>
+                          <Button
+                            className='link padded'
+                            onClick={this.submitChanges}
+                          >
+                            Save
+                          </Button>
+                        </Grid.Row>
+                      </>
+                      :
+                      <>
+                        <List items={terms} size='big' divided horizontal className='terms-list'/>
+                        <Grid.Row style={{textAlign: 'right'}}>
+                          <Button
+                            className='link padded'
+                            onClick={this.toggleEditTerms}
+                          >
+                            Edit
+                          </Button>
+                        </Grid.Row>
+                      </>
+                  )
                 }
-                <Button icon='add' content='Add Item' circular onClick={this.addTerm} />
-              </div>
+              </Container>
               {
                 (this.state.touched && !this.state.terms.includes(''))
-                ? (
+                && (
                   <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                     <Button
                       size='mini'
@@ -179,7 +135,7 @@ class Dashboard extends Component {
                       size='mini'
                       onClick={this.submitChanges} color='blue'>Save List</Button>
                   </div>
-                ) : (<div style={{height: '29px'}} />)
+                )
               }
             </Segment>
 
