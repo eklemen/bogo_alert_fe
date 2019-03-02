@@ -12,6 +12,7 @@ class FindMyStore extends Component {
       zipCode: '',
       selectedStore: ''
     };
+    this.handleSelectStore = this.handleSelectStore.bind(this);
   }
 
   async componentDidMount() {
@@ -26,11 +27,9 @@ class FindMyStore extends Component {
     this.props._getStoresByZip(this.state.zipCode)
   };
 
-  handleSelectStore = store => async () => {
-    const update = await this.props._updateStore(store);
-    if (update && update.store) {
-      this.props.history.push('/dashboard/');
-    }
+  handleSelectStore = async store => {
+    await this.props._updateStore(store, true);
+    this.props.cancel();
   };
 
   render() {
@@ -61,7 +60,6 @@ class FindMyStore extends Component {
                   storesList.data.STORES.map((store) => (
                     <Table.Row
                       key={store.WASTORENUM}
-                      onClick={this.handleSelectStore(store)}
                       active={store.WASTORENUM === selectedStore}
                     >
                       <Table.Cell style={{paddingLeft: '2em'}}>
@@ -89,7 +87,7 @@ class FindMyStore extends Component {
                           icon='add'
                           content={iconsOnly ? '' : 'Add'}
                           size='tiny'
-                          onClick={this.handleSelectStore(store)}
+                          onClick={() => this.handleSelectStore(store)}
                         />
                       </Table.Cell>
                     </Table.Row>

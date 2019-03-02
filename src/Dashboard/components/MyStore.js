@@ -50,8 +50,20 @@ class MyStore extends React.Component {
             </div>
           }
           {
+            !data.store &&
+            !loading &&
+            !isEditing &&
+            <Button
+              className='btn-link'
+              style={{alignSelf: 'flex-end'}}
+              onClick={this.toggleEdit}
+            >
+              Find Your Store
+            </Button>
+          }
+          {
             isEditing &&
-            <FindMyStore {...this.props} iconsOnly cancel={this.toggleEdit} />
+            <FindMyStore {...this.props} iconsOnly cancel={this.toggleEdit}/>
           }
         </div>
       </Segment>

@@ -12,25 +12,32 @@ class ContextProvider extends React.Component {
     this.state = {
       user: {error: null, data: {}, fetching: false},
       storesList: {error: null, data: {}, fetching: false},
-    }
+      typeAhead: {error: null, data: null, fetching: false}
+    };
     this.baseState = this.state;
   }
 
-  query = ({name, url, reqObj = null, method = 'post'}) => {
+  query = ({name, url, reqObj = null, method = 'post', hotSwap = false}) => {
 
-    this.setState({
-      [name]: {
-        ...this.state[name],
-        fetching: true,
-      }
-    });
+    if (!hotSwap) {
+      this.setState({
+        [name]: {
+          ...this.state[name],
+          fetching: true,
+        }
+      });
+    }
     return axios({url, data: reqObj, method})
       .then(({data}) => {
+        let rData = data;
+        if (hotSwap) {
+          rData = {...this.state[name], ...data}
+        }
         this.setState({
           [name]: {
             ...this.state[name],
             fetching: false,
-            data,
+            data: rData,
             error: null
           }
         });
@@ -69,7 +76,7 @@ class ContextProvider extends React.Component {
     return this.query({name: 'storesList', reqObj: {zipCode}, url:'api/stores'})
   };
 
-  _updateStore = (store) => {
+  _updateStore = (store, hotSwap = false) => {
     const reqObj = {
       storeNum: store.WASTORENUM,
       name: store.NAME,
@@ -80,12 +87,16 @@ class ContextProvider extends React.Component {
       long: store.CLON,
     };
     return (
-      this.query({name: 'user', reqObj, url: '/api/user/store'})
+      this.query({name: 'user', reqObj, url: '/api/user/store', hotSwap})
     );
   };
 
   _updateUserTerms = (terms) => (
     this.query({name: 'user', reqObj: {terms}, url: '/api/terms'})
+  );
+
+  _getTypeAhead = (term) => (
+    this.query({name: 'typeAhead', method: 'get', url: `/api/terms/search/${term}`})
   );
 
   render() {
@@ -99,6 +110,7 @@ class ContextProvider extends React.Component {
         _updateStore: this._updateStore,
         _updateUserTerms: this._updateUserTerms,
         _clear: this._clear,
+        _getTypeAhead: this._getTypeAhead
       }}>
         {this.props.children}
       </ServiceContext.Provider>

@@ -5,7 +5,9 @@ import {withService} from '../Context/withService';
 import {checkUser} from '../shared/utils';
 import MyStore from "./components/MyStore";
 import CreatableSelect from 'react-select/lib/Creatable';
-import {groceries} from '../shared/constants';
+import AsyncSelect from 'react-select/lib/Async';
+
+const unescape = require('lodash.unescape');
 
 class Dashboard extends Component {
   constructor(props) {
@@ -17,7 +19,6 @@ class Dashboard extends Component {
       editTermValue: '',
       touched: false,
     };
-    this.groceries = groceries;
   }
 
   async componentDidMount() {
@@ -48,16 +49,40 @@ class Dashboard extends Component {
     this.toggleEditTerms();
   };
 
+  handleTypeAhead = async (e) => {
+    if(e.length) {
+      const suggestions = await this.props._getTypeAhead(e);
+      return suggestions.map(s => ({
+        label: unescape(s),
+        value: unescape(s)
+      }))
+    }
+  };
+
   render() {
     const {user: {data}, user} = this.props;
     const {terms} = this.state;
     const loading = (user.fetching || !Object.keys(user.data).length) && !user.error;
-    const options = terms.map(label => {
-      return {
-        label,
-        value: label.toLowerCase(),
-      }
-    });
+    let options = [];
+    if (terms.length) {
+      options = terms.map(label => {
+        return {
+          label,
+          value: label.toLowerCase(),
+        }
+      });
+    } else {
+      options = [{
+        label: 'bread',
+        value: 'bread'
+      },{
+        label: 'eggs',
+        value: 'eggs'
+      },{
+        label: 'milk',
+        value: 'milk'
+      }]
+    }
     return (
       <Grid style={{height: '100%', justifyContent: 'center'}} verticalAlign='top'>
         <Grid.Row>
@@ -66,7 +91,6 @@ class Dashboard extends Component {
         <Grid.Row columns={2}>
           <Grid.Column mobile={16} computer={8}>
             <MyStore loading={loading} data={data}/>
-
           </Grid.Column>
           <Grid.Column mobile={16} computer={8}>
             <Segment loading={loading} textAlign='left'>
@@ -94,7 +118,12 @@ class Dashboard extends Component {
                           isMulti
                           defaultValue={options}
                           onChange={this.handleChange}
-                          options={this.groceries}
+                        />
+                        <AsyncSelect
+                          cacheOptions
+                          isMulti
+                          loadOptions={this.handleTypeAhead}
+                          defaultOptions={options}
                         />
                         <Grid.Row style={{textAlign: 'right', paddingTop: '0.6em'}}>
                           <Button
@@ -111,13 +140,17 @@ class Dashboard extends Component {
                       </>
                       :
                       <>
-                        <List items={terms} size='big' divided horizontal className='terms-list'/>
+                        {
+                          terms.length
+                            ? <List items={terms} size='big' divided horizontal className='terms-list'/>
+                            : <Header as='h3' textAlign='center'>Click below to get started</Header>
+                        }
                         <Grid.Row style={{textAlign: 'right'}}>
                           <Button
                             className='link padded'
                             onClick={this.toggleEditTerms}
                           >
-                            Edit
+                            {terms.length ? 'Edit' : 'Add Terms'}
                           </Button>
                         </Grid.Row>
                       </>
