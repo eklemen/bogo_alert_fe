@@ -4,8 +4,7 @@ import {withCookies} from 'react-cookie';
 import {withService} from '../Context/withService';
 import {checkUser} from '../shared/utils';
 import MyStore from "./components/MyStore";
-import CreatableSelect from 'react-select/lib/Creatable';
-import AsyncSelect from 'react-select/lib/Async';
+import AsyncCreatable from 'react-select/lib/AsyncCreatable';
 
 const unescape = require('lodash.unescape');
 
@@ -19,14 +18,14 @@ class Dashboard extends Component {
       editTermValue: '',
       touched: false,
     };
+    this.submitChanges = this.submitChanges.bind(this);
   }
 
   async componentDidMount() {
     if (checkUser.call(this)) {
       const {terms} = await this.props._getUser();
       terms && this.setState({terms});
-    }
-    ;
+    };
   }
 
   toggleEditTerms = () => {
@@ -63,26 +62,18 @@ class Dashboard extends Component {
     const {user: {data}, user} = this.props;
     const {terms} = this.state;
     const loading = (user.fetching || !Object.keys(user.data).length) && !user.error;
-    let options = [];
-    if (terms.length) {
-      options = terms.map(label => {
-        return {
-          label,
-          value: label.toLowerCase(),
-        }
-      });
-    } else {
-      options = [{
-        label: 'bread',
-        value: 'bread'
-      },{
-        label: 'eggs',
-        value: 'eggs'
-      },{
-        label: 'milk',
-        value: 'milk'
-      }]
-    }
+    const options = [{
+      label: 'bread',
+      value: 'bread'
+    },{
+      label: 'eggs',
+      value: 'eggs'
+    },{
+      label: 'milk',
+      value: 'milk'
+    }];
+    const dropdownVals = terms.map(t => ({label: t, value: t}));
+
     return (
       <Grid style={{height: '100%', justifyContent: 'center'}} verticalAlign='top'>
         <Grid.Row>
@@ -114,14 +105,11 @@ class Dashboard extends Component {
                   (this.state.editTerms
                       ?
                       <>
-                        <CreatableSelect
-                          isMulti
-                          defaultValue={options}
-                          onChange={this.handleChange}
-                        />
-                        <AsyncSelect
+                        <AsyncCreatable
                           cacheOptions
                           isMulti
+                          value={dropdownVals}
+                          onChange={this.handleChange}
                           loadOptions={this.handleTypeAhead}
                           defaultOptions={options}
                         />

@@ -5,7 +5,7 @@ import {Menu, Container} from 'semantic-ui-react';
 const Navbar = () => {
   const logout = <NavLink to='/logout/' className='logo-link'>Logout</NavLink>;
   return (
-    <Menu size='massive' className='main-header' color='teal' inverted>
+    <Menu size='massive' className='main-header' color='teal' inverted style={{borderRadius: 0}}>
       <Container>
         <NavLink to='/dashboard/' className='logo-link'>BOGO Alert</NavLink>
         <Route path="/dashboard/" render={() => logout}/>

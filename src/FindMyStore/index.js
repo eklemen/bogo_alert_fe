@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {withCookies} from 'react-cookie';
 import {Grid, Button, Form, Table, Container, Header} from 'semantic-ui-react';
 import {withService} from '../Context/withService';
-import AsyncSection from '../shared/AsyncSection';
 import {checkUser} from '../shared/utils';
 
 class FindMyStore extends Component {
@@ -45,14 +44,14 @@ class FindMyStore extends Component {
               focus
             />
             <Button content='Cancel' type='button' onClick={cancel} />
-            <Button type='submit'>
+            <Button type='submit' color='teal' loading={storesList.fetching}>
               Search
             </Button>
           </Form>
         </Grid.Row>
         <Grid.Row>
           <Container className='store-list'>
-            <AsyncSection dataSet={storesList}>
+            <React.Fragment>
               <Table basic='very' padded>
                 <Table.Body>
                 {
@@ -75,16 +74,18 @@ class FindMyStore extends Component {
                           </Header.Content>
                         </Header>
                       </Table.Cell>
-                      <Table.Cell style={{padding: '0'}}>
-                        <Button
-                          icon='map marker alternate'
-                          content={iconsOnly ? '' : 'Map'}
-                          size='tiny'
-                        />
-                      </Table.Cell>
+                      {/*<Table.Cell style={{padding: '0'}}>*/}
+                        {/*<Button*/}
+                          {/*icon='map marker alternate'*/}
+                          {/*content={iconsOnly ? '' : 'Map'}*/}
+                          {/*size='tiny'*/}
+                        {/*/>*/}
+                      {/*</Table.Cell>*/}
                       <Table.Cell style={{padding: '0'}}>
                         <Button
                           icon='add'
+                          color='teal'
+                          circular
                           content={iconsOnly ? '' : 'Add'}
                           size='tiny'
                           onClick={() => this.handleSelectStore(store)}
@@ -95,7 +96,7 @@ class FindMyStore extends Component {
                 }
                 </Table.Body>
               </Table>
-            </AsyncSection>
+            </React.Fragment>
           </Container>
         </Grid.Row>
       </Grid>
